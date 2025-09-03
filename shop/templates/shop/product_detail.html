@@ -1,0 +1,202 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ product.name }} | MiniShop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --brown-dark: #61210f;
+            --brown-light: #d8a47f;
+            --purple-soft: #dfb2f4;
+            --green: #81a684;
+            --green-dark: #57886c;
+            --bg-light: #f5eee6;
+        }
+
+         footer {
+            background-color: var(--brown-dark);
+            color: white;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: #212529;
+        }
+
+        h2, h5 {
+            color: var(--brown-dark);
+        }
+
+        .btn-primary {
+            background-color: var(--brown-light);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--green-dark);
+        }
+
+        .btn-success {
+            background-color: var(--green);
+            border: none;
+        }
+
+        .btn-success:hover {
+            background-color: var(--green-dark);
+        }
+
+        .product-price {
+            color: var(--green);
+            font-weight: bold;
+        }
+
+        .category-label {
+            color: var(--purple-soft);
+            font-weight: 500;
+        }
+
+        .rating-star {
+            color: var(--purple-soft);
+        }
+
+        .review-card {
+            border: none;
+            border-left: 4px solid var(--brown-light);
+            background-color: #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .img-container img {
+            border-radius: 1rem;
+            object-fit: cover;
+            width: 100%;
+            max-height: 400px;
+        }
+
+        .form-control, textarea {
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg shadow-sm mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">🛒 MiniShop</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Перемкнути навігацію">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'profile' %}">Привіт, {{ user.username }}!</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'categories_list' %}">Категории</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'cart_detail' %}">Кошик</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Вийти</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'categories_list' %}">Категории</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">Увійти</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'register' %}">Реєстрація</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+
+    <a href="{% url 'home' %}" class="btn btn-outline-secondary mb-3">← Назад до каталогу</a>
+
+    <div class="row g-4">
+        <div class="col-md-6 img-container">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" class="img-fluid" alt="{{ product.name }}">
+            {% else %}
+            <div class="alert alert-secondary">Немає зображення</div>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <h2>{{ product.name }}</h2>
+            <p class="category-label">{{ product.category.name }}</p>
+            <h4 class="product-price">{{ product.price }} грн</h4>
+            <p>{{ product.description }}</p>
+            <p><strong>Рейтинг:</strong>
+                {% if avg_rating %}
+                <span class="rating-star">⭐ {{ avg_rating }}</span>
+                {% else %}
+                Немає оцінок
+                {% endif %}
+            </p>
+            <p><strong>У наявності:</strong> {{ product.stock }} шт</p>
+
+            <a href="{% url 'add_to_cart' product.id %}" class="btn btn-success mt-2">Додати до кошика</a>
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    {% if user.is_authenticated %}
+    {% if not user_review %}
+    <h5>Залишити відгук:</h5>
+    <form method="post" class="mb-4">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.rating.label_tag }} {{ form.rating }}
+        </div>
+        <div class="mb-3">
+            {{ form.comment.label_tag }} {{ form.comment }}
+        </div>
+        <button type="submit" class="btn btn-primary">Надіслати</button>
+    </form>
+    {% else %}
+    <div class="alert alert-info">Ви вже залишили відгук на цей товар.</div>
+    {% endif %}
+    {% else %}
+    <div class="alert alert-warning">
+        <a href="{% url 'login' %}">Увійдіть</a>, щоб залишити відгук.
+    </div>
+    {% endif %}
+
+    <hr>
+    <h5>Відгуки:</h5>
+    {% for review in reviews %}
+    <div class="card review-card my-3">
+        <div class="card-body">
+            <strong>{{ review.user.username }}</strong>
+            <span class="text-warning">★ {{ review.rating }}</span><br>
+            <small class="text-muted">{{ review.created_at|date:"d.m.Y H:i" }}</small>
+            <p class="mt-2">{{ review.comment }}</p>
+        </div>
+    </div>
+    {% empty %}
+    <p>Ще немає відгуків.</p>
+    {% endfor %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<footer class="py-4 mt-auto">
+    <div class="container text-center">
+        <p class="mb-0">&copy; 2025 MiniShop — Всі права захищено</p>
+        <small>Розроблено з ❤️ для курсового проєкту</small>
+    </div>
+</footer>
+</body>
+</html>
