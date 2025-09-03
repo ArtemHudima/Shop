@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-!^+h8qy-qcu1_njl8kx#w09(5d536h&lu!b_2gn@$=8q1gajtf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['shop-rh3q.onrender.com']
 
 
 # Application definition
@@ -147,4 +147,5 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'tymofieiev014_20@idguonline.net'
 EMAIL_HOST_PASSWORD = 'zkwr bibe sisv quqq'
+
 DEFAULT_FROM_EMAIL = 'MiniShop <no-reply@minishop.com>'
